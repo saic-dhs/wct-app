@@ -141,7 +141,7 @@ spec:
     stage('Deliver') {
       when {
         anyOf {
-          branch 'develop'
+          branch 'feature/devops_improvements'
           branch 'master'
           buildingTag()
         }
@@ -173,7 +173,7 @@ spec:
           parallel {
             stage('Push Dev') {
               when {
-                branch 'develop'
+                branch 'feature/devops_improvements'
               }
               steps {
                 container('kod') {
@@ -250,7 +250,7 @@ spec:
  *  Sends a Slack notification with a proper build result
  */
 def sendSlackNotification(org.jenkinsci.plugins.workflow.support.steps.build.RunWrapper currentBuild) {
-  if (env.BRANCH_NAME == 'develop' ||
+  if (env.BRANCH_NAME == 'feature/devops_improvements' ||
       env.BRANCH_NAME == 'master' ||
       (env.TAG_NAME != null && env.TAG_NAME.length > 0)) {
     if (currentBuild.result == "ABORTED") {
