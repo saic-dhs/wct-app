@@ -96,8 +96,8 @@ spec:
       steps {
         container('python') {
           sh '''
-            curl -sL https://taskfile.dev/install.sh | sh
-            task installDeps
+            curl -sL https://bin/taskfile.dev/install.sh | sh
+            bin/task installDeps
           '''
         }
       }
@@ -106,7 +106,7 @@ spec:
       steps {
         container('python') {
           sh '''
-            task safetyCheck
+            bin/task safetyCheck
           '''
         }
       }
@@ -115,7 +115,7 @@ spec:
       steps {
         container('python') {
           sh '''
-            task lint
+            bin/task lint
           '''
         }
       }
@@ -124,7 +124,7 @@ spec:
       steps {
         container('python') {
           sh '''
-            task test
+            bin/task test
           '''
         }
       }
@@ -133,7 +133,7 @@ spec:
       steps {
         container('kod') {
           sh '''
-            task dockerBuild
+            bin/task dockerBuild
           '''
         }
       }
@@ -152,7 +152,7 @@ spec:
             container('kod') {
               withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'AWS']]) {
                   sh '''
-                    task loginEcr
+                    bin/task loginEcr
                   '''
               }
             }
@@ -163,7 +163,7 @@ spec:
             container('kod') {
               withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'AWS']]) {
                   sh '''
-                    task createRepo NAME=${GROUP_NAME}/${IMAGE_NAME}
+                    bin/task createRepo NAME=${GROUP_NAME}/${IMAGE_NAME}
                   '''
               }
             }
@@ -179,7 +179,7 @@ spec:
                 container('kod') {
                   withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'AWS']]) {
                     sh '''
-                      task pushContainer FULLY_QUALIFIED_IMAGE_NAME=${DEV_IMAGE_TAG}
+                      bin/task pushContainer FULLY_QUALIFIED_IMAGE_NAME=${DEV_IMAGE_TAG}
                     '''
                   }
                 }
@@ -193,7 +193,7 @@ spec:
                 container('kod') {
                   withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'AWS']]) {
                     sh '''
-                      task pushContainer FULLY_QUALIFIED_IMAGE_NAME=${EDGE_IMAGE_TAG}
+                      bin/task pushContainer FULLY_QUALIFIED_IMAGE_NAME=${EDGE_IMAGE_TAG}
                     '''
                   }
                 }
@@ -207,8 +207,8 @@ spec:
                 container('kod') {
                   withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'AWS']]) {
                     sh '''
-                      task pushContainer FULLY_QUALIFIED_IMAGE_NAME=${LATEST_IMAGE_TAG}
-                      task pushContainer FULLY_QUALIFIED_IMAGE_NAME=${RELEASE_IMAGE_TAG}
+                      bin/task pushContainer FULLY_QUALIFIED_IMAGE_NAME=${LATEST_IMAGE_TAG}
+                      bin/task pushContainer FULLY_QUALIFIED_IMAGE_NAME=${RELEASE_IMAGE_TAG}
                     '''
                   }
                 }
