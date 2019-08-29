@@ -14,7 +14,8 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
+# not ignoring lib initially to capture prior versions of codebase that have source code in lib folder
+#lib/
 lib64/
 parts/
 sdist/
