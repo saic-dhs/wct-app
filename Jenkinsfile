@@ -96,7 +96,7 @@ spec:
       steps {
         container('python') {
           sh '''
-            curl -sL https://bin/taskfile.dev/install.sh | sh
+            curl -sL https://taskfile.dev/install.sh | sh
             bin/task installDeps
           '''
         }
