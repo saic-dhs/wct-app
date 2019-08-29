@@ -26,7 +26,9 @@ tasks:
       WCT_VERSION: 1.2.3
       PATH_TO_DATA_FILE: "wct_app/data"
     cmds:
-      - pytest --disable-warnings --quiet tests/wct_tests.py
+      - |
+        gunicorn -b 0.0.0.0:8000 -w 4 --log-level debug --daemon wct_app.main.app:APP && \
+        pytest --disable-warnings --quiet tests/wct_tests.py
 
   dockerBuild:
     desc: "Build the docker container. You can override the automatic number generation for SECRET_SAUCE by declaring SECRET_SAUCE=<number> after calling the task."
