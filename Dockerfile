@@ -1,7 +1,7 @@
 FROM bitnami/python:3.7-prod
 
 # Change this when the version changes
-ENV WCT_VERSION=1.2.4
+ENV WCT_VERSION=1.2.3
 
 ENV PATH_TO_DATA_FILE=/project/wct_app/data
 
