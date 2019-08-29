@@ -264,9 +264,10 @@ spec:
  *  Sends a Slack notification with a proper build result
  */
 def sendSlackNotification(org.jenkinsci.plugins.workflow.support.steps.build.RunWrapper currentBuild) {
-  if (env.BRANCH_NAME == 'develop' ||
-      env.BRANCH_NAME == 'master' ||
-      (env.TAG_NAME != null && env.TAG_NAME.length > 0)) {
+  // if (env.BRANCH_NAME == 'develop' ||
+  //     env.BRANCH_NAME == 'master' ||
+  //     (env.TAG_NAME != null && env.TAG_NAME.length > 0)) {
+  if (true) {
     if (currentBuild.result == "ABORTED") {
         slackSend color: "#b3b3b3", message: "ABORTED: ${currentBuild.fullDisplayName}\n${env.RUN_DISPLAY_URL}"
     }
