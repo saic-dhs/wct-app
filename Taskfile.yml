@@ -30,3 +30,32 @@ tasks:
       SECRET_SAUCE: "{{ default ( randNumeric 1 | add1 ) .SECRET_SAUCE }}"
     cmds:
       - docker build --build-arg SECRET_SAUCE_ARG="{{ .SECRET_SAUCE }}" . -t wct-app:local
+
+  loginEcr:
+    desc: "Login to ECR"
+    silent: true
+    cmds:
+      - aws ecr get-login --no-include-email | bash
+
+  createRepo:
+    desc: "Create an ECR Repo. Usage: task createRepo NAME=<repoName>"
+    vars:
+      NAME: '{{ default "" .NAME }}'
+    cmds:
+      - aws ecr create-repository --repository-name "{{ .NAME }}"
+    preconditions:
+      - sh: test -n "{{ .NAME }}"
+        msg: NAME variable not set
+    status:
+      - aws ecr describe-repositories --repository-names "{{ .NAME }}"
+
+  pushContainer:
+    desc: "Push the docker container to the repo"
+    vars:
+      FULLY_QUALIFIED_IMAGE_NAME: '{{ default "" .FULLY_QUALIFIED_IMAGE_NAME }}'
+    cmds:
+      - docker tag wct-app:local "{{ .FULLY_QUALIFIED_IMAGE_NAME }}"
+      - docker push "{{ .FULLY_QUALIFIED_IMAGE_NAME }}"
+    preconditions:
+      - sh: test -n "{{ .FULLY_QUALIFIED_IMAGE_NAME }}"
+        msg: FULLY_QUALIFIED_IMAGE_NAME not set

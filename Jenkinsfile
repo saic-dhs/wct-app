@@ -10,10 +10,12 @@ spec:
   containers:
   - name: python
     image: bitnami/python:3.7
+    imagePullPolicy: Always
     command: ['cat']
-    try: true
-  - name: docker
-    image: docker:stable
+    tty: true
+  - name: kod
+    image: ${DOCKER_REGISTRY}/team-vulcan/kubernetes-ops-deployer:latest
+    imagePullPolicy: Always
     command: ['cat']
     tty: true
     env:
@@ -40,7 +42,7 @@ spec:
     GROUP_NAME = 'vat4ng'
     IMAGE_NAME = 'wct-app'
     FULLY_QUALIFIED_IMAGE_NAME = "${DOCKER_REGISTRY}/${GROUP_NAME}/${IMAGE_NAME}"
-    LOCAL_IMAGE_TAG = "${FULLY_QUALIFIED_IMAGE_NAME}:local"
+    DEV_IMAGE_TAG = "${FULLY_QUALIFIED_IMAGE_NAME}:dev"
     EDGE_IMAGE_TAG = "${FULLY_QUALIFIED_IMAGE_NAME}:edge"
     LATEST_IMAGE_TAG = "${FULLY_QUALIFIED_IMAGE_NAME}:latest"
     RELEASE_IMAGE_TAG = "${FULLY_QUALIFIED_IMAGE_NAME}:${TAG_NAME}"
@@ -97,7 +99,7 @@ spec:
         container('python') {
           sh '''
             curl -sL https://taskfile.dev/install.sh | sh
-            bin/task install-deps
+            bin/task installDeps
           '''
         }
       }
@@ -107,7 +109,7 @@ spec:
       steps {
         container('python') {
           sh '''
-            bin/task safety-check
+            bin/task safetyCheck
           '''
         }
       }
@@ -133,65 +135,94 @@ spec:
       }
     }
 
-    stage("Build") {
+    stage('Build Container') {
       steps {
-        container('python') {
+        container('kod') {
           sh '''
-            docker build --pull -t ${LOCAL_IMAGE_TAG} ./src/docker
+            bin/task dockerBuild
           '''
         }
       }
     }
 
-    stage("Deliver") {
+    stage('Deliver') {
       when {
         anyOf {
+          branch 'develop'
           branch 'master'
           buildingTag()
         }
       }
       stages {
 
-        stage("Login Docker") {
+        stage('Login Docker') {
           steps {
-            container('docker') {
-              withCredentials([usernamePassword(credentialsId: 'gitlab-creds', passwordVariable: 'GITLAB_PASSWORD', usernameVariable: 'GITLAB_USERNAME')]) {
+            container('kod') {
+              withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'AWS']]) {
                   sh '''
-                    docker login -u ${GITLAB_USERNAME} -p ${GITLAB_PASSWORD} ${DOCKER_REGISTRY}
+                    bin/task loginEcr
                   '''
               }
             }
           }
         }
 
-        stage('Push Container'){
+        stage('Create Repo') {
+          steps {
+            container('kod') {
+              withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'AWS']]) {
+                  sh '''
+                    bin/task createRepo NAME=${GROUP_NAME}/${IMAGE_NAME}
+                  '''
+              }
+            }
+          }
+        }
+
+        stage('Push Container') {
           parallel {
+            stage('Push Dev') {
+              when {
+                branch 'develop'
+              }
+              steps {
+                container('kod') {
+                  withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'AWS']]) {
+                    sh '''
+                      bin/task pushContainer FULLY_QUALIFIED_IMAGE_NAME=${DEV_IMAGE_TAG}
+                    '''
+                  }
+                }
+              }
+            }
+
             stage('Push Edge') {
               when {
                 branch 'master'
               }
               steps {
-                container('docker') {
-                  sh '''
-                    docker tag ${LOCAL_IMAGE_TAG} ${EDGE_IMAGE_TAG}
-                    docker push ${EDGE_IMAGE_TAG}
-                  '''
+                container('kod') {
+                  withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'AWS']]) {
+                    sh '''
+                      bin/task pushContainer FULLY_QUALIFIED_IMAGE_NAME=${EDGE_IMAGE_TAG}
+                    '''
+                  }
                 }
               }
             }
 
-            stage ('Push Release') {
+            stage('Push Release') {
               when {
                 buildingTag()
               }
               steps {
-                container('docker') {
-                  sh '''
-                    docker tag ${LOCAL_IMAGE_TAG} ${RELEASE_IMAGE_TAG}
-                    docker push ${RELEASE_IMAGE_TAG}
-                    docker tag ${LOCAL_IMAGE_TAG} ${LATEST_IMAGE_TAG}
-                    docker push ${LATEST_IMAGE_TAG}
-                  '''
+                container('kod') {
+                  withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'AWS']]) {
+                    sh '''
+                      bin/task pushContainer FULLY_QUALIFIED_IMAGE_NAME=${LATEST_IMAGE_TAG}
+                      bin/task pushContainer FULLY_QUALIFIED_IMAGE_NAME=${RELEASE_IMAGE_TAG}
+                    '''
+                  }
                 }
               }
             }
