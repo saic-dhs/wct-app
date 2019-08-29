@@ -21,6 +21,8 @@ tasks:
   test:
     desc: Test the app
     dir: wct_app
+    env:
+      SECRET_SAUCE: "{{ default ( randNumeric 1 | add1 ) .SECRET_SAUCE }}"
     cmds:
       - pytest --disable-warnings --quiet tests/wct_tests.py
 

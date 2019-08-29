@@ -38,7 +38,6 @@ spec:
     }
   }
   environment {
-
     GROUP_NAME = 'vat4ng'
     IMAGE_NAME = 'wct-app'
     FULLY_QUALIFIED_IMAGE_NAME = "${DOCKER_REGISTRY}/${GROUP_NAME}/${IMAGE_NAME}"
@@ -93,58 +92,52 @@ spec:
   // }
 
   stages {
-
     stage('Install Dependencies') {
       steps {
         container('python') {
           sh '''
             curl -sL https://taskfile.dev/install.sh | sh
-            bin/task installDeps
+            task installDeps
           '''
         }
       }
     }
-
     stage('Safety Check') {
       steps {
         container('python') {
           sh '''
-            bin/task safetyCheck
+            task safetyCheck
           '''
         }
       }
     }
-
     stage('Lint') {
       steps {
         container('python') {
           sh '''
-            bin/task lint
+            task lint
           '''
         }
       }
     }
-
     stage('Test') {
       steps {
         container('python') {
           sh '''
-            bin/task test
+            task test
           '''
         }
       }
     }
-
     stage('Build Container') {
       steps {
         container('kod') {
           sh '''
-            bin/task dockerBuild
+            task dockerBuild
           '''
         }
       }
     }
-
     stage('Deliver') {
       when {
         anyOf {
@@ -154,31 +147,28 @@ spec:
         }
       }
       stages {
-
         stage('Login Docker') {
           steps {
             container('kod') {
               withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'AWS']]) {
                   sh '''
-                    bin/task loginEcr
+                    task loginEcr
                   '''
               }
             }
           }
         }
-
         stage('Create Repo') {
           steps {
             container('kod') {
               withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'AWS']]) {
                   sh '''
-                    bin/task createRepo NAME=${GROUP_NAME}/${IMAGE_NAME}
+                    task createRepo NAME=${GROUP_NAME}/${IMAGE_NAME}
                   '''
               }
             }
           }
         }
-
         stage('Push Container') {
           parallel {
             stage('Push Dev') {
@@ -189,13 +179,12 @@ spec:
                 container('kod') {
                   withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'AWS']]) {
                     sh '''
-                      bin/task pushContainer FULLY_QUALIFIED_IMAGE_NAME=${DEV_IMAGE_TAG}
+                      task pushContainer FULLY_QUALIFIED_IMAGE_NAME=${DEV_IMAGE_TAG}
                     '''
                   }
                 }
               }
             }
-
             stage('Push Edge') {
               when {
                 branch 'master'
@@ -204,13 +193,12 @@ spec:
                 container('kod') {
                   withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'AWS']]) {
                     sh '''
-                      bin/task pushContainer FULLY_QUALIFIED_IMAGE_NAME=${EDGE_IMAGE_TAG}
+                      task pushContainer FULLY_QUALIFIED_IMAGE_NAME=${EDGE_IMAGE_TAG}
                     '''
                   }
                 }
               }
             }
-
             stage('Push Release') {
               when {
                 buildingTag()
@@ -219,8 +207,8 @@ spec:
                 container('kod') {
                   withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'AWS']]) {
                     sh '''
-                      bin/task pushContainer FULLY_QUALIFIED_IMAGE_NAME=${LATEST_IMAGE_TAG}
-                      bin/task pushContainer FULLY_QUALIFIED_IMAGE_NAME=${RELEASE_IMAGE_TAG}
+                      task pushContainer FULLY_QUALIFIED_IMAGE_NAME=${LATEST_IMAGE_TAG}
+                      task pushContainer FULLY_QUALIFIED_IMAGE_NAME=${RELEASE_IMAGE_TAG}
                     '''
                   }
                 }
@@ -231,7 +219,6 @@ spec:
       }
     }
   }
-
   post {
     aborted {
       script {
@@ -259,7 +246,6 @@ spec:
     }
   }
 }
-
 /**
  *  Sends a Slack notification with a proper build result
  */
