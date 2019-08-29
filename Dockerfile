@@ -5,12 +5,12 @@ ENV WCT_VERSION=1.2.4
 ENV PATH_TO_DATA_FILE=/wct_app/data
 
 RUN pip install --upgrade pip
-COPY ./wct_app/requirements.txt /tmp/requirements.txt
-RUN	pip install --no-cache  -r /tmp/requirements.txt
+COPY ./wct_app/requirements.txt /wct_app/requirements.txt
+RUN	pip install --no-cache  -r /wct_app/requirements.txt
 
-COPY ./ /
+COPY ./wct_app /wct_app
 
-WORKDIR /
+WORKDIR /wct_app
 
 EXPOSE 8000
 
