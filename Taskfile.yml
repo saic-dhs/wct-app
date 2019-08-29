@@ -24,6 +24,7 @@ tasks:
     env:
       SECRET_SAUCE: "{{ default ( randNumeric 1 | add1 ) .SECRET_SAUCE }}"
       WCT_VERSION: 1.2.3
+      PATH_TO_DATA_FILE: "/project/wct_app/data"
     cmds:
       - pytest --disable-warnings --quiet tests/wct_tests.py
 
