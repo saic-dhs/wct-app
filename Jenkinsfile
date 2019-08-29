@@ -231,4 +231,56 @@ spec:
       }
     }
   }
+
+  post {
+    aborted {
+      script {
+        currentBuild.result = "ABORTED"
+        sendSlackNotification(currentBuild)
+      }
+    }
+    failure {
+      script {
+        currentBuild.result = "FAILURE"
+        sendSlackNotification(currentBuild)
+      }
+    }
+    success {
+      script {
+        currentBuild.result = "SUCCESS"
+        sendSlackNotification(currentBuild)
+      }
+    }
+    unstable {
+      script {
+        currentBuild.result = "UNSTABLE"
+        sendSlackNotification(currentBuild)
+      }
+    }
+  }
+}
+
+/**
+ *  Sends a Slack notification with a proper build result
+ */
+def sendSlackNotification(org.jenkinsci.plugins.workflow.support.steps.build.RunWrapper currentBuild) {
+  if (env.BRANCH_NAME == 'develop' ||
+      env.BRANCH_NAME == 'master' ||
+      (env.TAG_NAME != null && env.TAG_NAME.length > 0)) {
+    if (currentBuild.result == "ABORTED") {
+        slackSend color: "#b3b3b3", message: "ABORTED: ${currentBuild.fullDisplayName}\n${env.RUN_DISPLAY_URL}"
+    }
+    else if (currentBuild.result == "SUCCESS") {
+        slackSend color: "good", message: "SUCCESS: ${currentBuild.fullDisplayName}\n${env.RUN_DISPLAY_URL}";
+    }
+    else if (currentBuild.result == "FAILURE") {
+        slackSend color: "danger", message: "FAILURE: ${currentBuild.fullDisplayName}\n${env.RUN_DISPLAY_URL}";
+    }
+    else if (currentBuild.result == "UNSTABLE") {
+        slackSend color: "warning", message: "UNSTABLE: ${currentBuild.fullDisplayName}\n${env.RUN_DISPLAY_URL}";
+    }
+    else {
+        slackSend color: "danger", message: "UNKNOWN: ${currentBuild.fullDisplayName}\n${env.RUN_DISPLAY_URL}";
+    }
+  }
 }
