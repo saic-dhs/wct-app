@@ -1,0 +1,32 @@
+version: "2"
+
+tasks:
+  installDeps:
+    desc: Install dependencies
+    cmds:
+      - pip install --upgrade pip
+      - pip3 install --no-cache -r wct_app/requirements.txt
+
+  safetyCheck:
+    desc: Run safety check
+    cmds:
+      - safety check
+
+  lint:
+    desc: Lint the app
+    dir: wct_app
+    cmds:
+      - pylint --errors-only **/*.py
+
+  test:
+    desc: Test the app
+    dir: wct_app
+    cmds:
+      - pytest --disable-warnings --quiet tests/wct_tests.py
+
+  dockerBuild:
+    desc: "Build the docker container. You can override the automatic number generation for SECRET_SAUCE by declaring SECRET_SAUCE=<number> after calling the task."
+    vars:
+      SECRET_SAUCE: "{{ default ( randNumeric 1 | add1 ) .SECRET_SAUCE }}"
+    cmds:
+      - docker build --build-arg SECRET_SAUCE_ARG="{{ .SECRET_SAUCE }}" . -t wct-app:local

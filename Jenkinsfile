@@ -8,6 +8,10 @@ apiVersion: v1
 kind: Pod
 spec:
   containers:
+  - name: python
+    image: bitnami/python:3.7
+    command: ['cat']
+    try: true
   - name: docker
     image: docker:stable
     command: ['cat']
@@ -32,6 +36,7 @@ spec:
     }
   }
   environment {
+
     GROUP_NAME = 'vat4ng'
     IMAGE_NAME = 'wct-app'
     FULLY_QUALIFIED_IMAGE_NAME = "${DOCKER_REGISTRY}/${GROUP_NAME}/${IMAGE_NAME}"
@@ -52,15 +57,15 @@ spec:
     JSON_OUTPUT = "true"
 
     //Whitesource settings
-    PRODUCT = "hello-world-gateway"
-    PROJECT = "hello-world-gateway"
+    PRODUCT = "wct-app"
+    PROJECT = "wct-app"
 
-    // kubernetes-ops-deployer settings
-    GIT_URL_NO_PROTOCOL = 'github.com/saic-devsecops/hello-world-ops-config.git'
-    APPLICATION_NAME = 'hello-world'
-    APPLICATION_PROTOCOL = 'http://'
-    APPLICATION_HEALTH_ENDPOINT = '/management/health'
-    SERVICE_DEPLOY_TAG_NAME = 'HELLO_WORLD_GATEWAY_DEPLOY_TAG'
+    // // kubernetes-ops-deployer settings
+    // GIT_URL_NO_PROTOCOL = 'github.com/saic-devsecops/hello-world-ops-config.git'
+    // APPLICATION_NAME = 'hello-world'
+    // APPLICATION_PROTOCOL = 'http://'
+    // APPLICATION_HEALTH_ENDPOINT = '/management/health'
+    // SERVICE_DEPLOY_TAG_NAME = 'HELLO_WORLD_GATEWAY_DEPLOY_TAG'
   }
   options {
     timeout(time: 1, unit: 'HOURS')
@@ -87,9 +92,50 @@ spec:
 
   stages {
 
+    stage('Install Dependencies') {
+      steps {
+        container('python') {
+          sh '''
+            curl -sL https://taskfile.dev/install.sh | sh
+            bin/task install-deps
+          '''
+        }
+      }
+    }
+
+    stage('Safety Check') {
+      steps {
+        container('python') {
+          sh '''
+            bin/task safety-check
+          '''
+        }
+      }
+    }
+
+    stage('Lint') {
+      steps {
+        container('python') {
+          sh '''
+            bin/task lint
+          '''
+        }
+      }
+    }
+
+    stage('Test') {
+      steps {
+        container('python') {
+          sh '''
+            bin/task test
+          '''
+        }
+      }
+    }
+
     stage("Build") {
       steps {
-        container('docker') {
+        container('python') {
           sh '''
             docker build --pull -t ${LOCAL_IMAGE_TAG} ./src/docker
           '''
