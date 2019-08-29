@@ -23,6 +23,7 @@ tasks:
     dir: wct_app
     env:
       SECRET_SAUCE: "{{ default ( randNumeric 1 | add1 ) .SECRET_SAUCE }}"
+      WCT_VERSION: 1.2.3
     cmds:
       - pytest --disable-warnings --quiet tests/wct_tests.py
 
@@ -30,8 +31,13 @@ tasks:
     desc: "Build the docker container. You can override the automatic number generation for SECRET_SAUCE by declaring SECRET_SAUCE=<number> after calling the task."
     vars:
       SECRET_SAUCE: "{{ default ( randNumeric 1 | add1 ) .SECRET_SAUCE }}"
+      WCT_VERSION: 1.2.3
     cmds:
-      - docker build --build-arg SECRET_SAUCE_ARG="{{ .SECRET_SAUCE }}" . -t wct-app:local
+      - |
+        docker build . \
+          --build-arg SECRET_SAUCE_ARG="{{ .SECRET_SAUCE }}" \
+          --build-arg WCT_VERSION="{{ .WCT_VERSION }}" \
+          -t wct-app:local
 
   loginEcr:
     desc: "Login to ECR"
