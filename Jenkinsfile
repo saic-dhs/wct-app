@@ -131,7 +131,7 @@ spec:
     }
     stage('Quality Gate') {
       steps {
-        container('python') {
+        container('kod') {
           withSonarQubeEnv('sonar') {
             sh '''
               bin/task sonar
