@@ -1,7 +1,7 @@
 version: "2"
 
 vars:
-  WCT_VERSION: '{{ default "1.2.3" .TAG_NAME }}'
+  WCT_VERSION: '{{ default "1.2.4" .TAG_NAME }}'
 
 tasks:
   installDeps:
@@ -29,7 +29,7 @@ tasks:
       PATH_TO_DATA_FILE: "wct_app/data"
     cmds:
       - pytest --cov-report xml --cov-config=.coveragerc --cov=. wct_app/tests/wct_tests.py
-  
+
   sonar:
     desc: Publish to sonar
     dir: .
