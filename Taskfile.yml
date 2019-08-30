@@ -1,0 +1,112 @@
+version: "2"
+
+vars:
+  WCT_VERSION: '{{ default "1.2.3" .TAG_NAME }}'
+
+tasks:
+  installDeps:
+    desc: Install dependencies
+    cmds:
+      - pip install --upgrade pip
+      - pip3 install --no-cache -r wct_app/requirements.txt
+
+  safetyCheck:
+    desc: Run safety check
+    cmds:
+      - safety check
+
+  lint:
+    desc: Lint the app
+    dir: wct_app
+    cmds:
+      - pylint --errors-only **/*.py
+
+  test:
+    desc: Test the app
+    env:
+      SECRET_SAUCE: "{{ default ( randNumeric 1 | add1 ) .SECRET_SAUCE }}"
+      WCT_VERSION: "{{ .WCT_VERSION }}"
+      PATH_TO_DATA_FILE: "wct_app/data"
+    cmds:
+      - pytest --cov-report xml --cov-config=.coveragerc --cov=. wct_app/tests/wct_tests.py
+  
+  sonar:
+    desc: Publish to sonar
+    dir: .
+    cmds:
+      - docker run -v $(pwd):/usr/src -v $(pwd)/sonar-project.properties:/usr/lib/sonar-scanner/conf/sonar-scanner.properties -e SONAR_AUTH_TOKEN="{{ .SONAR_AUTH_TOKEN }}" -e SONAR_HOST_URL={{ .SONAR_HOST_URL }} -e WCT_VERSION="{{ .WCT_VERSION }}" newtmitch/sonar-scanner
+
+  dockerBuild:
+    desc: "Build the docker container. You can override the automatic number generation for SECRET_SAUCE by declaring SECRET_SAUCE=<number> after calling the task."
+    vars:
+      SECRET_SAUCE: "{{ default ( randNumeric 1 | add1 ) .SECRET_SAUCE }}"
+    cmds:
+      - |
+        docker build . \
+          --build-arg SECRET_SAUCE_ARG="{{ .SECRET_SAUCE }}" \
+          --build-arg WCT_VERSION="{{ .WCT_VERSION }}" \
+          -t wct-app:local
+
+  loginEcr:
+    desc: "Login to ECR"
+    silent: true
+    cmds:
+      - aws ecr get-login --no-include-email | bash
+
+  createRepo:
+    desc: "Create an ECR Repo. Usage: task createRepo NAME=<repoName>"
+    vars:
+      NAME: '{{ default "" .NAME }}'
+    cmds:
+      - aws ecr create-repository --repository-name "{{ .NAME }}"
+    preconditions:
+      - sh: test -n "{{ .NAME }}"
+        msg: NAME variable not set
+    status:
+      - aws ecr describe-repositories --repository-names "{{ .NAME }}"
+
+  pushContainer:
+    desc: "Push the docker container to the repo"
+    vars:
+      FULLY_QUALIFIED_IMAGE_NAME: '{{ default "" .FULLY_QUALIFIED_IMAGE_NAME }}'
+    cmds:
+      - docker tag wct-app:local "{{ .FULLY_QUALIFIED_IMAGE_NAME }}"
+      - docker push "{{ .FULLY_QUALIFIED_IMAGE_NAME }}"
+    preconditions:
+      - sh: test -n "{{ .FULLY_QUALIFIED_IMAGE_NAME }}"
+        msg: FULLY_QUALIFIED_IMAGE_NAME not set
+
+  getKubeconfig:
+    desc: "Get the kubeconfig file for the cluster"
+    vars:
+      AWS_ACCOUNT_ID:
+        sh: aws sts get-caller-identity | jq -r .Account
+    cmds:
+      - |
+        aws eks update-kubeconfig \
+          --name "${CLUSTER_ID}" \
+          --kubeconfig ./kubeconfig \
+          --alias wct_app \
+          --role-arn "arn:aws:iam::{{ .AWS_ACCOUNT_ID }}:role/${CLUSTER_ID}-k8s-master"
+
+  deploy:
+    desc: "Deploy the app"
+    dir: helmsman
+    vars:
+      ENV: '{{ default "" .ENV }}'
+      KUBE_NAMESPACE: '{{ default "" .KUBE_NAMESPACE }}'
+      TAG_TO_DEPLOY: '{{ default "" .TAG_TO_DEPLOY }}'
+    cmds:
+      - |
+        TAG_TO_DEPLOY="{{ .TAG_TO_DEPLOY }}" \
+        ENV="{{ .ENV }}" \
+        KUBE_NAMESPACE="{{ .KUBE_NAMESPACE }}" \
+        helmsman --apply -f desired-state.yaml \
+          --kubeconfig ../kubeconfig
+    preconditions:
+      - sh: test -n "{{ .ENV }}"
+        msg: "ENV not set"
+      - sh: test -n "{{ .KUBE_NAMESPACE }}"
+        msg: "KUBE_NAMESPACE not set"
+      - sh: test -n "{{ .TAG_TO_DEPLOY }}"
+        msg: "TAG_TO_DEPLOY not set"
