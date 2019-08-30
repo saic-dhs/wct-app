@@ -218,6 +218,86 @@ spec:
         }
       }
     }
+    // stage('Deploy') {
+    //   when {
+    //     anyOf {
+    //       branch 'develop'
+    //       branch 'master'
+    //       buildingTag()
+    //     }
+    //   }
+    //   stages {
+    //     stage('Get Kubeconfig') {
+    //       steps {
+    //         container('kod') {
+    //           withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'AWS']]) {
+    //               sh '''
+    //                 bin/task getKubeconfig
+    //               '''
+    //           }
+    //         }
+    //       }
+    //     }
+    //     stage('Create Repo') {
+    //       steps {
+    //         container('kod') {
+    //           withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'AWS']]) {
+    //               sh '''
+    //                 bin/task createRepo NAME=${GROUP_NAME}/${IMAGE_NAME}
+    //               '''
+    //           }
+    //         }
+    //       }
+    //     }
+    //     stage('Push Container') {
+    //       parallel {
+    //         stage('Push Dev') {
+    //           when {
+    //             branch 'develop'
+    //           }
+    //           steps {
+    //             container('kod') {
+    //               withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'AWS']]) {
+    //                 sh '''
+    //                   bin/task pushContainer FULLY_QUALIFIED_IMAGE_NAME=${DEV_IMAGE_TAG}
+    //                 '''
+    //               }
+    //             }
+    //           }
+    //         }
+    //         stage('Push Edge') {
+    //           when {
+    //             branch 'master'
+    //           }
+    //           steps {
+    //             container('kod') {
+    //               withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'AWS']]) {
+    //                 sh '''
+    //                   bin/task pushContainer FULLY_QUALIFIED_IMAGE_NAME=${EDGE_IMAGE_TAG}
+    //                 '''
+    //               }
+    //             }
+    //           }
+    //         }
+    //         stage('Push Release') {
+    //           when {
+    //             buildingTag()
+    //           }
+    //           steps {
+    //             container('kod') {
+    //               withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'AWS']]) {
+    //                 sh '''
+    //                   bin/task pushContainer FULLY_QUALIFIED_IMAGE_NAME=${LATEST_IMAGE_TAG}
+    //                   bin/task pushContainer FULLY_QUALIFIED_IMAGE_NAME=${RELEASE_IMAGE_TAG}
+    //                 '''
+    //               }
+    //             }
+    //           }
+    //         }
+    //       }
+    //     }
+    //   }
+    // }
   }
   post {
     aborted {

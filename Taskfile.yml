@@ -1,5 +1,8 @@
 version: "2"
 
+vars:
+  WCT_VERSION: '{{ default "1.2.3" .TAG_NAME }}'
+
 tasks:
   installDeps:
     desc: Install dependencies
@@ -23,7 +26,7 @@ tasks:
     dir: wct_app
     env:
       SECRET_SAUCE: "{{ default ( randNumeric 1 | add1 ) .SECRET_SAUCE }}"
-      WCT_VERSION: 1.2.3
+      WCT_VERSION: "{{ .WCT_VERSION }}"
       PATH_TO_DATA_FILE: "data"
     cmds:
       - pytest tests/wct_tests.py
@@ -32,7 +35,6 @@ tasks:
     desc: "Build the docker container. You can override the automatic number generation for SECRET_SAUCE by declaring SECRET_SAUCE=<number> after calling the task."
     vars:
       SECRET_SAUCE: "{{ default ( randNumeric 1 | add1 ) .SECRET_SAUCE }}"
-      WCT_VERSION: 1.2.3
     cmds:
       - |
         docker build . \
@@ -68,3 +70,8 @@ tasks:
     preconditions:
       - sh: test -n "{{ .FULLY_QUALIFIED_IMAGE_NAME }}"
         msg: FULLY_QUALIFIED_IMAGE_NAME not set
+
+  getKubeconfig:
+    desc: "Get the kubeconfig file for the cluster"
+    cmds:
+      -

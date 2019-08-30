@@ -1,0 +1,35 @@
+metadata:
+  org: github.com/saic-dhs
+  maintainer: Tech Challenge Team
+  description: Desired State for the WCT app
+
+settings:
+  kubeContext: "${CLUSTER_NAME}"
+  storageBackend: secret
+  serviceAccount: "tiller-${KUBE_NAMESPACE}"
+  reverseDelete: true
+
+namespaces:
+  kube-system:
+    installTiller: false
+  ${KUBE_NAMESPACE}:
+    installTiller: true
+    protected: false
+
+helmRepos:
+  stable: https://kubernetes-charts.storage.googleapis.com/
+  incubator: https://kubernetes-charts-incubator.storage.googleapis.com/
+
+apps:
+  example-app:
+    enabled: ${EXAMPLE_APP_ENABLED}
+    purge: false
+    protected: false
+    priority: 0
+    wait: false
+    name: "example-app"
+    description: "Example app - Ghost"
+    namespace: "${KUBE_NAMESPACE}"
+    chart: "stable/ghost"
+    version: "${EXAMPLE_APP_VERSION}"
+    valuesFile: "example-app/values.yaml"

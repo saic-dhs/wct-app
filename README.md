@@ -73,4 +73,5 @@ The docker container will be built and tagged as `wct-app:local`
 
 ### Releasing a new version
 
-1. Change the value of the `WCT_VERSION` variable in [Dockerfile](./Dockerfile)
+1. Change the value of the default in the `WCT_VERSION` variable in [Taskfile.ynml](./Taskfile.yml)
+2. If you are building a tag through Jenkins, the tag name will become the version.
