@@ -24,3 +24,8 @@ def widgetize():
         'widget':widgetized.widget,
         'wct_version': WCT_VERSION
         })
+
+@APP.route('/health', methods=['GET'])
+def ready():
+
+    return jsonify(success=True)

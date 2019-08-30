@@ -11,6 +11,7 @@ def client():
     yield client
 
 ROUTE = '/api/v0/widgetize'
+HEALTH = '/health'
 
 def test_env_var_exist():
     assert os.getenv('SECRET_SAUCE') != None
@@ -32,3 +33,7 @@ def test_good_payload(client):
 def test_bad_payload(client):
     r = client.post(ROUTE, data=json.dumps({'bad_material': 'foo'}))
     assert r.status_code == 400
+
+def test_health_endpoint(client):
+    r = client.get(HEALTH)
+    assert r.status_code == 200

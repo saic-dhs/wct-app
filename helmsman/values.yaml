@@ -1,0 +1,32 @@
+image:
+  repository: 076055786493.dkr.ecr.us-east-1.amazonaws.com/vat4ng/wct-app
+  pullPolicy: Always
+
+nameOverride: "wct-app"
+fullnameOverride: "wct-app"
+
+containerPort: 8000
+
+ingress:
+  enabled: true
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    kubernetes.io/tls-acme: "true"
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 512Mi
+  limits:
+    cpu: 200m
+    memory: 1024Mi
+
+livenessProbe:
+  httpGet:
+    path: /health
+    port: http
+
+readinessProbe:
+  httpGet:
+    path: /health
+    port: http
