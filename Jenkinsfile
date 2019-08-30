@@ -129,6 +129,17 @@ spec:
         }
       }
     }
+    stage('Quality Gate') {
+      steps {
+        container('kod') {
+          withSonarQubeEnv('sonar') {
+            sh '''
+              bin/task sonar
+            '''
+          }
+        }
+      }
+    }
     stage('Build Container') {
       steps {
         container('kod') {
