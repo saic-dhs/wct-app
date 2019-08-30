@@ -33,7 +33,7 @@ tasks:
   sonar:
     desc: Publish to sonar
     cmds:
-      - docker run -v $(pwd):/usr/src -v $(pwd)/sonar-project.properties:/usr/lib/sonar-scanner/conf/sonar-scanner.properties -e SONAR_AUTH_TOKEN="{{ .SONAR_AUTH_TOKEN }}" -e SONAR_HOST_URL={{ . SONAR_HOST_URL }} newtmitch/sonar-scanner
+      - docker run -v $(pwd):/usr/src -v $(pwd)/sonar-project.properties:/usr/lib/sonar-scanner/conf/sonar-scanner.properties -e SONAR_AUTH_TOKEN="{{ .SONAR_AUTH_TOKEN }}" -e SONAR_HOST_URL={{ . SONAR_HOST_URL }} -e WCT_VERSION="{{ .WCT_VERSION }}" newtmitch/sonar-scanner
 
   dockerBuild:
     desc: "Build the docker container. You can override the automatic number generation for SECRET_SAUCE by declaring SECRET_SAUCE=<number> after calling the task."
