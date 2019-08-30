@@ -4,7 +4,7 @@ metadata:
   description: Desired State for the WCT app
 
 settings:
-  kubeContext: "${CLUSTER_NAME}"
+  kubeContext: wct_app
   storageBackend: secret
   serviceAccount: "tiller-${KUBE_NAMESPACE}"
   reverseDelete: true
@@ -19,17 +19,22 @@ namespaces:
 helmRepos:
   stable: https://kubernetes-charts.storage.googleapis.com/
   incubator: https://kubernetes-charts-incubator.storage.googleapis.com/
+  private-stable: "https://saic-chart-user:${SAIC_DEVSECOPS_CHARTS_PASSWORD}@raw.githubusercontent.com/saic-devsecops/charts/master/"
 
 apps:
-  example-app:
-    enabled: ${EXAMPLE_APP_ENABLED}
+  wct-app:
+    enabled: true
     purge: false
     protected: false
     priority: 0
     wait: false
-    name: "example-app"
-    description: "Example app - Ghost"
+    name: "wct-app"
+    description: "WCT App"
     namespace: "${KUBE_NAMESPACE}"
-    chart: "stable/ghost"
-    version: "${EXAMPLE_APP_VERSION}"
-    valuesFile: "example-app/values.yaml"
+    chart: "private-stable/generic-web-app"
+    version: "0.1.0"
+    valuesFiles:
+      - values.yaml
+      - values-${ENV}.yaml
+    setString:
+      image.tag: "${TAG_TO_DEPLOY}"

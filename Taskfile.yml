@@ -74,4 +74,26 @@ tasks:
   getKubeconfig:
     desc: "Get the kubeconfig file for the cluster"
     cmds:
-      -
+      - aws eks update-kubeconfig --name ${CLUSTER_ID} --kubeconfig ./kubeconfig --alias wct_app
+
+  deploy:
+    desc: "Deploy the app"
+    dir: helmsman
+    vars:
+      ENV: '{{ default "" .ENV }}'
+      KUBE_NAMESPACE: '{{ default "" .KUBE_NAMESPACE }}'
+      TAG_TO_DEPLOY: '{{ default "" .TAG_TO_DEPLOY }}'
+    cmds:
+      - |
+        TAG_TO_DEPLOY="{{ .TAG_TO_DEPLOY }}" \
+        ENV="{{ .ENV }}" \
+        KUBE_NAMESPACE="{{ .KUBE_NAMESPACE }}" \
+        helmsman --apply -f desired-state.yaml \
+          --kubeconfig ../kubeconfig
+    preconditions:
+      - sh: test -n "{{ .ENV }}"
+        msg: "ENV not set"
+      - sh: test -n "{{ .KUBE_NAMESPACE }}"
+        msg: "KUBE_NAMESPACE not set"
+      - sh: test -n "{{ .TAG_TO_DEPLOY }}"
+        msg: "TAG_TO_DEPLOY not set"

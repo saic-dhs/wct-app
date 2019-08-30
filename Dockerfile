@@ -18,4 +18,4 @@ ARG SECRET_SAUCE_ARG=7
 ENV WCT_VERSION=${WCT_VERSION}
 ENV SECRET_SAUCE=${SECRET_SAUCE_ARG}
 
-CMD gunicorn -b 0.0.0.0:8000 -w 4 --log-level debug wct_app.main.app:APP
+CMD gunicorn -b :8000 -w 4 --log-level debug wct_app.main.app:APP
