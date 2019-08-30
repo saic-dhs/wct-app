@@ -26,7 +26,7 @@ tasks:
     env:
       SECRET_SAUCE: "{{ default ( randNumeric 1 | add1 ) .SECRET_SAUCE }}"
       WCT_VERSION: "{{ .WCT_VERSION }}"
-      PATH_TO_DATA_FILE: "data"
+      PATH_TO_DATA_FILE: "wct_app/data"
     cmds:
       - pytest --cov-report xml --cov-config=.coveragerc --cov=. wct_app/tests/wct_tests.py
   
