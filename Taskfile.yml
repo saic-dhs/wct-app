@@ -77,11 +77,12 @@ tasks:
       AWS_ACCOUNT_ID:
         sh: aws sts get-caller-identity | jq -r .Account
     cmds:
-      - aws eks update-kubeconfig \
-        --name ${CLUSTER_ID} \
-        --kubeconfig ./kubeconfig \
-        --alias wct_app \
-        --role-arn "arn:aws:iam::{{ .AWS_ACCOUNT_ID }}:role/${CLUSTER_ID}-k8s-master"
+      - |
+        aws eks update-kubeconfig \
+          --name "${CLUSTER_ID}" \
+          --kubeconfig ./kubeconfig \
+          --alias wct_app \
+          --role-arn "arn:aws:iam::{{ .AWS_ACCOUNT_ID }}:role/${CLUSTER_ID}-k8s-master"
 
   deploy:
     desc: "Deploy the app"
