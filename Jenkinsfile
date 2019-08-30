@@ -141,7 +141,7 @@ spec:
     stage('Deliver') {
       when {
         anyOf {
-          branch 'develop'
+          branch 'feature/devops_improvements'
           branch 'master'
           buildingTag()
         }
@@ -173,7 +173,7 @@ spec:
           parallel {
             stage('Push Dev') {
               when {
-                branch 'develop'
+                branch 'feature/devops_improvements'
               }
               steps {
                 container('kod') {
@@ -221,7 +221,7 @@ spec:
     stage('Deploy') {
       when {
         anyOf {
-          branch 'develop'
+          branch 'feature/devops_improvements'
           branch 'master'
           buildingTag()
         }
@@ -242,7 +242,7 @@ spec:
           parallel {
             stage('Deploy Dev') {
               when {
-                branch 'develop'
+                branch 'feature/devops_improvements'
               }
               steps {
                 container('kod') {
