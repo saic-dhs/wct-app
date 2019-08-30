@@ -47,6 +47,7 @@ coverage.xml
 *.cover
 .hypothesis/
 .pytest_cache/
+.scannerwork
 
 # Translations
 *.mo
@@ -103,3 +104,9 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+# taskfile goes to bin directory
+/bin
+
+# Ignore generated kubeconfig files
+kubeconfig
