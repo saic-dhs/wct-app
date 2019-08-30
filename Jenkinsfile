@@ -60,36 +60,12 @@ spec:
     //Whitesource settings
     PRODUCT = "wct-app"
     PROJECT = "wct-app"
-
-    // // kubernetes-ops-deployer settings
-    // GIT_URL_NO_PROTOCOL = 'github.com/saic-devsecops/hello-world-ops-config.git'
-    // APPLICATION_NAME = 'hello-world'
-    // APPLICATION_PROTOCOL = 'http://'
-    // APPLICATION_HEALTH_ENDPOINT = '/management/health'
-    // SERVICE_DEPLOY_TAG_NAME = 'HELLO_WORLD_GATEWAY_DEPLOY_TAG'
   }
   options {
     timeout(time: 1, unit: 'HOURS')
     buildDiscarder(logRotator(numToKeepStr: '5'))
     timestamps()
   }
-
-  // options {
-  //   gitLabConnection('code.saicinnovationfactory.com')
-  //   timeout(time: 1, unit: 'HOURS')
-  // }
-  // triggers {
-  //   gitlab(triggerOnPush: true, triggerOnMergeRequest: true, branchFilterType: 'All')
-  // }
-  // environment {
-  //   GROUP_NAME = 'devsecops/docker-images'
-  //   IMAGE_NAME = 'rclone'
-  //   FULLY_QUALIFIED_IMAGE_NAME = "${DOCKER_REGISTRY}/${GROUP_NAME}/${IMAGE_NAME}"
-  //   LOCAL_IMAGE_TAG = "${FULLY_QUALIFIED_IMAGE_NAME}:local"
-  //   EDGE_IMAGE_TAG = "${FULLY_QUALIFIED_IMAGE_NAME}:edge"
-  //   LATEST_IMAGE_TAG = "${FULLY_QUALIFIED_IMAGE_NAME}:latest"
-  //   RELEASE_IMAGE_TAG = "${FULLY_QUALIFIED_IMAGE_NAME}:${TAG_NAME}"
-  // }
 
   stages {
     stage('Install Dependencies') {
