@@ -105,7 +105,7 @@ spec:
         }
       }
     }
-    stage('Quality Gate') {
+    stage('SonarQube Quality Scan') {
       steps {
         container('kod') {
           withSonarQubeEnv('sonar') {
