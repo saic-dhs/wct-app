@@ -138,10 +138,15 @@ spec:
         }
       }
     }
-    stage('Deliver') {
+
+
+
+
+
+    stage('Start Delivery') {
       when {
         anyOf {
-          branch 'feature/devops_improvements'
+          branch 'develop'
           branch 'master'
           buildingTag()
         }
@@ -173,7 +178,7 @@ spec:
           parallel {
             stage('Push Dev') {
               when {
-                branch 'feature/devops_improvements'
+                branch 'develop'
               }
               steps {
                 container('kod') {
@@ -218,10 +223,15 @@ spec:
         }
       }
     }
-    stage('Deploy') {
+
+
+
+
+
+    stage('Start Deployment') {
       when {
         anyOf {
-          branch 'feature/devops_improvements'
+          branch 'develop'
           branch 'master'
           buildingTag()
         }
@@ -242,7 +252,7 @@ spec:
           parallel {
             stage('Deploy Dev') {
               when {
-                branch 'feature/devops_improvements'
+                branch 'develop'
               }
               steps {
                 container('kod') {
